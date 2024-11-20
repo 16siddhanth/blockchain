@@ -1,18 +1,7 @@
-# _config.yml
-
 title: My Awesome Site
 description: A description of my awesome website
-baseurl: ""  # The base URL for your site (leave blank if it's a root-level site)
-url: "https://16Siddhanth.github.io"  # Your GitHub Pages URL
+baseurl: ""  
+url: "https://16Siddhanth.github.io"  
 
-# Specify the theme here (e.g., `minima`, `jekyll-theme-cayman`, etc.)
 theme: jekyll-theme-minima
 
-# Additional configurations (optional)
-markdown: kramdown
-theme_config:
-  sidebar:
-    - title: "About"
-      url: "/about"
-    - title: "Blog"
-      url: "/blog"

@@ -1,7 +1,6 @@
 import requests
-import json
 
-# Change the server_address (and port) as needed.
+# The server address (adjust if needed)
 server_address = "http://127.0.0.1:5000"
 
 def create_transaction(sender, receiver, amount):
@@ -19,12 +18,19 @@ def mine_block():
 
 def get_blockchain():
     response = requests.get(f"{server_address}/chain")
-    chain = response.json()
-    print("Current Blockchain Ledger:")
-    print(json.dumps(chain, indent=4))
+    if response.status_code == 200:
+        chain = response.json()
+        print("Current Blockchain Ledger:")
+        for block in chain:
+            print(f"Block #{block['index']} - Hash: {block['previous_hash']} - Nonce: {block['nonce']}")
+    else:
+        print("Error fetching blockchain:", response.text)
 
 if __name__ == "__main__":
     # Example usage: create a transaction, mine it, and then display the ledger.
-    create_transaction("Alice", "Bob", 10)
-    mine_block()
-    get_blockchain()
+    print("Creating transaction...")
+    create_transaction("Alice", "Bob", 10)  # Example transaction
+    print("Mining block...")
+    mine_block()  # Mine the transaction
+    print("Fetching blockchain...")
+    get_blockchain()  # Display the blockchain

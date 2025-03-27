@@ -1,0 +1,8 @@
+Develop a program for the following using block chain concepts.
+1.Create multiple nodes and manage using socket program
+2.Manage block chain to maintain patient data across hospital(where doctor access ) access through once node. Where A new patient visit and hospital, create  genesis block. 
+3.When doctor write, do blood test. Patient goes to diagnostic center, they access patient data through block chain.( Dr created already). Then they do blood test, that data you add in the next block. So doctor will get incentive update his balance of e-cash. Update tx in ledger.
+4.Then the patient goes back to doctor to show blood test report. That time doctor access the data created by diagnostic center, so now diagnostic center get the incentive in terms of e-cash. After seeing report, doctor write prescription. For this new block to be added in block chain. 
+5.Then the patient goes to pharmacy, they access the prescription from block chain, that time doctor get incentive. Then patient buy medicines. 
+ 
+All the people mentioned above will access by logging in to system. Once node can be used for authentication by storing username,password.

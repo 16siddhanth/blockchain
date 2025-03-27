@@ -142,11 +142,11 @@ class NodeServer(threading.Thread):
                             if diagnostic in users:
                                 users[diagnostic]["balance"] += 5
                         elif block_data.get("action") == "prescription":
-                            pass
-                        elif block_data.get("action") == "medicine_purchase":
                             doctor = block_data.get("doctor")
                             if doctor in users:
                                 users[doctor]["balance"] += 5
+                        elif block_data.get("action") == "medicine_purchase":
+                            pass
 
                     response["status"] = "success"
                     response["message"] = f"Block added by {self.node_id} with index {new_block.index}."

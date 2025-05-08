@@ -1,97 +1,170 @@
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
+
+
+public class BlockMining {
+    
+    public static void main(String[] args) {
+        // Create a new blockchain
+        Blockchain blockchain = new Blockchain(6); 
+        
+        System.out.println("Mining block 1...");
+        blockchain.addBlock(new Block(1, "Block 1 Balle Balle", blockchain.getLatestBlock().getHash()));
+        
+        System.out.println("Mining block 2...");
+        blockchain.addBlock(new Block(2, "Block 2 YoYo ", blockchain.getLatestBlock().getHash()));
+        
+        System.out.println("Mining block 3...");
+        blockchain.addBlock(new Block(3, "Block 3 the goattttt", blockchain.getLatestBlock().getHash()));
+        
+        System.out.println("\nBlockchain validation: " + blockchain.isChainValid());
+        
+        // Print the entire blockchain
+        System.out.println("\nThe blockchain:");
+        System.out.println(blockchain);
+    }
+}
 
 class Block {
-    public String hash;
-    public String previousHash;
+    private int index;
+    private long timestamp;
     private String data;
-    private long timeStamp;
-
-    public Block(String data, String previousHash) {
+    private String previousHash;
+    private String hash;
+    private int nonce;
+    
+    
+    public Block(int index, String data, String previousHash) {
+        this.index = index;
+        this.timestamp = new Date().getTime();
         this.data = data;
         this.previousHash = previousHash;
-        this.timeStamp = System.currentTimeMillis();
+        this.nonce = 0;
         this.hash = calculateHash();
     }
-
+    
+    
     public String calculateHash() {
-        String input = previousHash + Long.toString(timeStamp) + data;
-        return applySha256(input);
+        String dataToHash = index + timestamp + previousHash + data + nonce;
+        return applySha256(dataToHash);
     }
-
-    public static String applySha256(String input) {
+    
+    
+    private String applySha256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes("UTF-8"));
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
+            
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
+            
             return hexString.toString();
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
-
-    public String getData() {
-        return data;
+    
+    
+    public void mineBlock(int difficulty) {
+        // Create a target string with 'difficulty' number of leading zeros
+        String target = new String(new char[difficulty]).replace('\0', '0');
+        
+        while (!hash.substring(0, difficulty).equals(target)) {
+            nonce++;
+            hash = calculateHash();
+        }
+        
+        System.out.println("Block mined! Hash: " + hash);
     }
-
-    public long getTimeStamp() {
-        return timeStamp;
+    
+    // Getters
+    public String getHash() {
+        return hash;
+    }
+    
+    public String getPreviousHash() {
+        return previousHash;
+    }
+    
+    @Override
+    public String toString() {
+        return "Block {" +
+                "\n   index: " + index +
+                "\n   timestamp: " + timestamp +
+                "\n   data: '" + data + '\'' +
+                "\n   previousHash: '" + previousHash + '\'' +
+                "\n   hash: '" + hash + '\'' +
+                "\n   nonce: " + nonce +
+                "\n}";
     }
 }
+
 
 class Blockchain {
     private List<Block> chain;
-
-    public Blockchain() {
-        chain = new ArrayList<>();
-        chain.add(createGenesisBlock());
+    private int difficulty;
+    
+    
+    public Blockchain(int difficulty) {
+        this.chain = new ArrayList<>();
+        this.difficulty = difficulty;
+        
+        // Create the genesis block (first block in the chain)
+        Block genesisBlock = new Block(0, "Genesis Block", "0");
+        genesisBlock.mineBlock(difficulty);
+        chain.add(genesisBlock);
+        
+        System.out.println("Genesis block created!");
     }
-
-    private Block createGenesisBlock() {
-        return new Block("Genesis Block", "0");
-    }
-
-    public void addBlock(String data) {
-        Block newBlock = new Block(data, chain.get(chain.size() - 1).hash);
+    
+    
+    public void addBlock(Block newBlock) {
+        newBlock.mineBlock(difficulty);
         chain.add(newBlock);
     }
-
-    public void printChain() {
-        for (Block block : chain) {
-            System.out.println("Block Hash: " + block.hash);
-            System.out.println("Previous Hash: " + block.previousHash);
-            System.out.println("Data: " + block.getData());
-            System.out.println("Timestamp: " + block.getTimeStamp());
-            System.out.println();
-        }
+    
+    
+    public Block getLatestBlock() {
+        return chain.get(chain.size() - 1);
     }
-}
-
-public class q1 {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        Blockchain myBlockchain = new Blockchain();
-
-        System.out.print("Enter the number of blocks to add to the blockchain: ");
-        int numBlocks = scanner.nextInt();
-        scanner.nextLine();
-
-        for (int i = 0; i < numBlocks; i++) {
-            System.out.print("Enter data for Block " + (i + 1) + ": ");
-            String data = scanner.nextLine();
-            myBlockchain.addBlock(data);
+    
+    
+    public boolean isChainValid() {
+        for (int i = 1; i < chain.size(); i++) {
+            Block currentBlock = chain.get(i);
+            Block previousBlock = chain.get(i - 1);
+            
+            // Verify the current block's hash
+            if (!currentBlock.getHash().equals(currentBlock.calculateHash())) {
+                System.out.println("Current hash is not valid");
+                return false;
+            }
+            
+            // Verify the reference to the previous block's hash
+            if (!currentBlock.getPreviousHash().equals(previousBlock.getHash())) {
+                System.out.println("Previous hash reference is not valid");
+                return false;
+            }
         }
-
-        myBlockchain.printChain();
-
-        scanner.close();
+        
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < chain.size(); i++) {
+            builder.append("Block #").append(i).append(":\n");
+            builder.append(chain.get(i).toString()).append("\n\n");
+        }
+        return builder.toString();
     }
 }
